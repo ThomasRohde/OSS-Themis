@@ -55,9 +55,9 @@ Perfect for enterprise architects, business analysts, and organizational designe
 
 ## Prerequisites
 
-- Python 3.11 or higher
-- Node.js 18 or higher
-- npm 9 or higher
+- [Git Client for Windows](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=e0d66c22617337c0c54df75aaf45901c&catalog_id=553833348d5c6700e10d47f81f09fd16)
+- [Python 3.12.4](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=fbd66062617337c0c54df75aaf45904e&catalog_id=553833348d5c6700e10d47f81f09fd16) or higher
+- [Node.js 23.3.0](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=ec21f170c3aa7d506fd59e472f5d7546&catalog_id=553833348d5c6700e10d47f81f09fd16) or higher
 
 ## Installation
 
@@ -81,19 +81,6 @@ npm run build
 # Run Themis
 themis
 ```
-
-## Development
-
-```bash
-# Start the backend server
-uvicorn bcm.main:app --reload --port 8000
-
-# In another terminal, start the frontend
-cd bcm-client
-npm start
-```
-
-The application will be available at `http://localhost:3000`
 
 ## Project Structure
 
