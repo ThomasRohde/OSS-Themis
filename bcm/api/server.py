@@ -1006,19 +1006,41 @@ async def get_capabilities(
             for cap in capabilities
         ]
 
+def sanitize_filename(filename: str) -> str:
+    """Sanitize filename for Windows compatibility."""
+    # Replace invalid characters with underscore
+    invalid_chars = '<>:"/\\|?*'
+    sanitized = ''.join('_' if c in invalid_chars else c for c in filename)
+    # Remove trailing spaces and periods
+    sanitized = sanitized.rstrip('. ')
+    # Limit length to 255 characters
+    return sanitized[:255]
+
 @api_app.get("/context")
 async def get_context():
     """Export entire capability model context as markdown files."""
     try:
+        # First get capabilities to find root node
+        root_nodes = await db_ops.get_capabilities(parent_id=None)
+        if not root_nodes:
+            raise HTTPException(status_code=404, detail="No capabilities found")
+        
+        # Use first root node's name for filename
+        root_name = sanitize_filename(root_nodes[0].name)
+        if not root_name:
+            root_name = "capability_model"  # fallback name
+        
         # Get markdown content split into files
         files = await export_context(db_ops)
+        if not files:
+            raise HTTPException(status_code=404, detail="No content to export")
         
         # If only one file and small enough, return directly
         if len(files) == 1:
             return Response(
                 content=files[0][1],
                 media_type="text/markdown",
-                headers={"Content-Disposition": f"attachment; filename={files[0][0]}"}
+                headers={"Content-Disposition": f"attachment; filename={root_name}.md"}
             )
         
         # Otherwise create zip file containing all parts
@@ -1030,7 +1052,7 @@ async def get_context():
         return Response(
             content=zip_buffer.getvalue(),
             media_type="application/zip",
-            headers={"Content-Disposition": "attachment; filename=context.zip"}
+            headers={"Content-Disposition": f"attachment; filename={root_name}.zip"}
         )
             
     except Exception as e:
