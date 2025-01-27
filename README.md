@@ -1,6 +1,6 @@
 # Themis
 
-![Themis](./bcm-client/src/assets/themis.png)
+![Themis](./bcm-client/src/assets/themis_small.png)
 
 Themis is a powerful collaborative tool for creating, managing and visualizing hierarchical concept models, with a primary focus on Business Capability Models (BCM). Drawing inspiration from the Greek goddess of divine order, Themis helps organizations bring structure and clarity to complex organizational hierarchies.
 
