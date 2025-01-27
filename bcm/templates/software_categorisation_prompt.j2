@@ -1,0 +1,55 @@
+Analyze the business capability '{{ capability_name }}' within the context provided below. Identify a set of software categories that can support the execution of this capability. Create up to {{ max_capabilities }} software categories.
+
+The context is formatted using section tags that organize the information:
+
+<first_level_capabilities> - Lists all top-level capabilities in the model with their descriptions
+<capability_tree> - Shows the full hierarchical tree structure with the current capability marked
+<parent_hierarchy> - Lists the chain of parent capabilities from root to current capability
+<sibling_context> - Shows other capabilities at the same level under the same parent
+<current_capability> - Contains the name and description of the current capability
+<sub_capabilities> - Lists any existing sub-capabilities under the current capability. You can use this to understand the potential scope of the capability.
+
+These section tags help structure the context in a way that makes it clear how each piece
+of information relates to the overall capability model hierarchy.
+
+**Context:**
+{{ context }}
+
+**Instructions:**
+For each software category identified, provide:
+1. **Name:** A concise and descriptive name that clearly communicates the software category's focus.
+2. **Description:** A two paragraph, business-oriented explanation in markdown format that outlines the software category's typical functions, how it supports the business capability, and the types of solutions that fall into the category. Ensure the description is understandable to both business and technical stakeholders. At the end of the description add a line prefixed with 'Tags: ', and list any tags associated with the software category.
+
+**Consider the following when defining software categories:**
+- **Relevance to the Capability:** Each software category should directly enable or improve the execution of '{{ capability_name }}'.
+- **Coverage of Scope:** Ensure the software categories cover the full scope of the business capability without leaving any functional areas unsupported.
+- **Avoid Overlap:**  Ensure software categories are distinct and not redundant.
+- **Business Value:** Clearly explain the value that software within this category brings to the organization in the context of the capability.
+- **Practical Applicability:**  Focus on common, well-defined software categories that are readily available and widely understood.
+- **Consistency:**  Maintain a consistent level of detail and abstraction across all categories.
+- **Expansion**: If the capability has existing software categories in <sub_capabilities>, you will find new categories that expand the scope of the capability, and not just repeat the current software categories.
+
+** JSON Output format: **
+- List of JSON objects, each object having "name" and "description" attributes, like this: ```[{"name": "Software Category 1", "description": "Description of Software Category 1"}, {"name": "Software Category 2", "description": "Description of Software Category 2"}]```
+- Tags line should be include at the end of the description, prefixed with '\n\n**Tags**: '.
+
+```json
+[
+  {
+    "name": "Software Category 1",
+    "description": "First paragraph describing Software Category 1 and its core functions.\n\nSecond paragraph explaining how this capability supports business objectives and what types of solutions are included.\n\n**Tags:** automation, workflow, integration"
+  },
+  {
+    "name": "Software Category 2",
+    "description": "First paragraph outlining the main purpose and features of Software Category 2.\n\nSecond paragraph detailing the business value and common implementation scenarios.\n\n**Tags:** analytics, reporting, dashboards"
+  },
+  {
+    "name": "Software Category 3",
+    "description": "First paragraph introducing Software Category 3 and its primary functionality.\n\nSecond paragraph describing the practical applications and benefits to stakeholders.\n\n**Tags:** collaboration, communication, sharing"
+  },
+  {
+    "name": "Software Category 4",
+    "description": "First paragraph explaining the core aspects and goals of Software Category 4.\n\nSecond paragraph highlighting key features and organizational impact.\n\n**Tags:** security, compliance, governance"
+  }
+]
+```

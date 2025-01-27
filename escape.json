@@ -1,0 +1,62 @@
+[
+    {
+        "id": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "parent": null,
+        "name": "Compliance Investigations & Whistleblowing",
+        "description": "The Compliance Investigations & Whistleblowing Domain is dedicated to upholding ethical standards and accountability within the organization. It focuses on managing whistleblower reports and conducting thorough investigations in alignment with established group policies. Through effective utilization of skilled personnel, structured processes, and compliant information management, this Domain mitigates potential risks associated with misconduct and promotes a culture of transparency and integrity. By leveraging technology and applications to support reporting mechanisms, the Domain ensures concerns are addressed promptly, reinforcing stakeholder trust and fostering a safe environment for employees to voice their concerns without fear of retaliation."
+    },
+    {
+        "id": "8a97ff24-512a-4f47-8ea4-aa235f2c97c4",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Whistleblower Reporting Management",
+        "description": "### Definition\n\nFacilitates the anonymous reporting of misconduct or policy violations by employees, ensuring confidentiality and protection against retaliation.\n\n### Key inputs\n\nWhistleblower reports, employee concerns, feedback mechanisms.\n\n### Key outputs\n\nReported incidents, trends in misconduct, compliance reports.\n\n### Key stakeholders\n\nEmployees, Compliance Officers, HR Departments.\n\n### Enabling technologies\n\nWhistleblowing software, incident management systems.\n\n### Industry alignment\n\nAligned with best practices in corporate governance and ethics, including ISO 37001."
+    },
+    {
+        "id": "e034ac50-5081-4136-a1d8-1c1f5e0181eb",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Investigation Case Management",
+        "description": "### Definition\n\nOversees the entire lifecycle of compliance investigations, from case initiation to resolution, ensuring thorough documentation and compliance with legal standards.\n\n### Key inputs\n\nInvestigation requests, relevant documentation, witness statements.\n\n### Key outputs\n\nInvestigation case logs, outcomes, recommendations.\n\n### Key stakeholders\n\nCompliance Officers, Legal Teams, Investigators.\n\n### Enabling technologies\n\nInvestigation management software, case tracking tools.\n\n### Industry alignment\n\nIn line with BIAN service domains for compliance management."
+    },
+    {
+        "id": "fd3b18a6-81f0-408f-9e35-e7ae7504c293",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Investigation Risk Assessment",
+        "description": "### Definition\n\nEvaluates risks associated with reported compliance issues and prioritizes cases based on severity and potential impact.\n\n### Key inputs\n\nIncident reports, risk evaluation metrics, historical data.\n\n### Key outputs\n\nRisk assessment reports, prioritized investigation list.\n\n### Key stakeholders\n\nCompliance Analysts, Risk Management Teams.\n\n### Enabling technologies\n\nRisk assessment tools, compliance analytics software.\n\n### Industry alignment\n\nIntegrates with frameworks like COSO for risk management."
+    },
+    {
+        "id": "3dbc7106-7992-4308-bbef-44b447dbcda9",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Compliance Training & Awareness",
+        "description": "### Definition\n\nDelivers training programs to employees on compliance, ethics, and reporting protocols to foster a culture of transparency.\n\n### Key inputs\n\nTraining materials, compliance regulations, employee feedback.\n\n### Key outputs\n\nTraining completion records, competency assessments.\n\n### Key stakeholders\n\nCompliance Officers, Learning & Development Teams, All Employees.\n\n### Enabling technologies\n\nLearning management systems (LMS), online training platforms.\n\n### Industry alignment\n\nAligned with ISO 19600 for compliance management systems."
+    },
+    {
+        "id": "234668f6-b7aa-42c9-9549-da70e15e440a",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Policy Development & Review",
+        "description": "### Definition\n\nCreates, reviews, and updates compliance policies to adhere to regulatory requirements and internal governance standards.\n\n### Key inputs\n\nRegulatory changes, feedback from stakeholders, best practice guidelines.\n\n### Key outputs\n\nRevised policies, compliance manuals, policy implementation plans.\n\n### Key stakeholders\n\nCompliance Officers, Legal Teams, Management.\n\n### Enabling technologies\n\nPolicy management tools, document management systems.\n\n### Industry alignment\n\nSupports compliance with frameworks such as ISO 37001."
+    },
+    {
+        "id": "93633a1f-384e-4724-963d-374ebd1630d5",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Incident Response & Documentation",
+        "description": "### Definition\n\nEstablishes protocols for responding to compliance violations and maintaining thorough documentation for accountability and audits.\n\n### Key inputs\n\nIncident reports, internal memos, communication logs.\n\n### Key outputs\n\nIncident summaries, response documentation, audit trails.\n\n### Key stakeholders\n\nCompliance Officers, Internal Audit Teams, Legal Departments.\n\n### Enabling technologies\n\nIncident management systems, compliance documentation software.\n\n### Industry alignment\n\nIn accordance with auditing standards including ISO 19011."
+    },
+    {
+        "id": "587a864f-17c3-4b26-b6f9-de18d4ca5a9f",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Regulatory Reporting",
+        "description": "### Definition\n\nCompiles and submits required reports to regulatory bodies regarding compliance investigations and whistleblower cases.\n\n### Key inputs\n\nInvestigation outcomes, regulatory requirements, data from investigations.\n\n### Key outputs\n\nRegulatory compliance reports, audit statements.\n\n### Key stakeholders\n\nCompliance Officers, Regulatory Affairs Teams.\n\n### Enabling technologies\n\nCompliance reporting software, data management tools.\n\n### Industry alignment\n\nConsistency with legal and regulatory frameworks such as GDPR."
+    },
+    {
+        "id": "b33d7657-b6b9-4b35-9f4a-f6882a2a7ffe",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Data Privacy Compliance",
+        "description": "### Definition\n\nEnsures adherence to data privacy laws in handling whistleblower reports and investigation data, protecting personally identifiable information.\n\n### Key inputs\n\nData privacy policies, incident reports, compliance regulations.\n\n### Key outputs\n\nData protection assessments, compliance audits.\n\n### Key stakeholders\n\nData Protection Officers, Compliance Teams, IT Security.\n\n### Enabling technologies\n\nData privacy management software, compliance audit tools.\n\n### Industry alignment\n\nAligned with GDPR, CCPA, and other data privacy regulations."
+    },
+    {
+        "id": "8d0729f1-fc21-4e22-85bd-ccf6fa5b252d",
+        "parent": "eda0b85fc37bb0106fd59e472f5d75b9",
+        "name": "Stakeholder Communication Management",
+        "description": "### Definition\n\nManages communication channels for stakeholders involved in compliance investigations to ensure clarity and transparency.\n\n### Key inputs\n\nStakeholder contact information, communication protocols.\n\n### Key outputs\n\nCommunication plans, stakeholder feedback reports.\n\n### Key stakeholders\n\nCompliance Officers, HR Departments, Legal Teams.\n\n### Enabling technologies\n\nCommunication management systems, email management tools.\n\n### Industry alignment\n\nSupports best practices in corporate communication strategies."
+    }
+]

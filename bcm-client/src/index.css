@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optimize drag performance */
+.dragging {
+  cursor: grabbing !important;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  transition: none !important;
+}
+
+/* Prevent layout shifts during drag */
+.capability-container {
+  contain: layout style paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Smooth transitions for non-drag states */
+.capability-transition {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Disable pointer events on children while dragging */
+.dragging * {
+  pointer-events: none !important;
+}
+
+/* Shake animation for locked items */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.shake-animation {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Custom drag layer styles */
+.dragging-ghost {
+  @apply fixed pointer-events-none shadow-xl rounded-lg border-2 border-blue-400 bg-white opacity-90;
+  width: var(--width);
+  height: var(--height);
+  transform: translate(var(--x), var(--y)) rotate(2deg) scale(1.02);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Drop target indicator */
+.capability-container {
+  position: relative;
+  z-index: 1;
+}
+
+.drop-target-child::before {
+  content: '';
+  @apply absolute inset-0 bg-green-50 opacity-0 rounded-lg;
+  transition: opacity 0.15s ease-in-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.drop-target-child.active::before {
+  opacity: 1;
+}
+
+.drop-target-child.active {
+  @apply border-green-500 border-2;
+}
+
+/* Drag preview */
+.drag-preview {
+  @apply fixed pointer-events-none bg-white rounded-lg border-2 border-blue-400 shadow-xl opacity-90;
+  transform: rotate(2deg) scale(1.02);
+}
+
+/* Visualization node styles */
+.node {
+  position: absolute;
+  transition: all 0.3s ease;
+  padding: var(--node-padding);
+  pointer-events: none;
+  border-radius: 5px;
+}
+
+.node .node-content {
+  pointer-events: auto;
+}
+
+.node-content {
+  text-align: center;
+  word-wrap: break-word;
+  position: absolute;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 4px 8px;
+  font-weight: 500;
+  white-space: pre-wrap;
+  width: calc(100% - 20px);
+  left: 50%;
+  z-index: 2;
+  color: var(--text-color);
+}
+
+.leaf-node .node-content {
+  top: 50%;
+  transform: translate(-50%, -50%) !important;
+}
+
+.parent-label {
+  top: 0;
+  transform: translate(-50%, 20%) !important;
+  z-index: 3;
+}
+
+.has-children {
+  z-index: 1;
+}
+
+/* Level-based z-indexing */
+.level-0 { z-index: 1; }
+.level-1 { z-index: 2; }
+.level-2 { z-index: 3; }
+.level-3 { z-index: 4; }
+.level-4 { z-index: 5; }
+.level-5 { z-index: 6; }
+.level-6 { z-index: 7; }
+
+/* Ensure node content stays above the node background */
+.node-content {
+  z-index: 10;
+}
+
+/* Debug grid */
+.debug-grid {
+  background-image: 
+    linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}

@@ -1,0 +1,68 @@
+[project]
+name = "themis"
+version = "0.1.13"
+description = "Themis is a concept modeling tool that helps you to create, manage and visualize your hierarchical concept, e.g., taxonomies or business capability models."
+authors = [
+    {name = "Thomas Klok Rohde", email = "thomas@rohde.name"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent", 
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Framework :: FastAPI",
+    "Framework :: AsyncIO",
+    "Natural Language :: English"
+]
+keywords = ["themis", "business", "capability", "modeling", "taxonomy", "mindmap", "enterprise-architecture"]
+dependencies = [
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.0.0",
+    "jinja2>=3.1.5",
+    "python-pptx>=1.0.2",
+    "markdown>=3.7",
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    "openpyxl>=3.1.5",
+    "pandas>=2.2.3",
+    "setuptools>=75.6.0",
+    "aiosqlite>=0.20.0",
+    "greenlet>=3.1.1",
+    "python-dotenv>=1.0.1",
+    "python-docx>=1.1.2",
+    "json-repair>=0.35.0",
+    "atlassian-python-api>=3.41.18",
+]
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+themis = "bcm.api.server:main"
+
+[project.urls]
+GitHub = "https://github.com/ThomasRohde/themis"
+
+[tool.hatch.build.targets.wheel]
+packages = ["bcm"]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.4",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.logfire]
+ignore_no_config = true

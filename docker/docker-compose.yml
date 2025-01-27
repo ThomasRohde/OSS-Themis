@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "80:80"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ..:/app
+    networks:
+      - themis-network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ../bcm-client:/app
+      - /app/node_modules
+    networks:
+      - themis-network
+
+networks:
+  themis-network:
+    driver: bridge
