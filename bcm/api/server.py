@@ -5,10 +5,10 @@ import uuid
 import zipfile
 from contextlib import asynccontextmanager
 from io import BytesIO
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from fastapi import (Depends, FastAPI, HTTPException, WebSocket,
-                     WebSocketDisconnect)
+                     WebSocketDisconnect, responses)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,9 +20,9 @@ from bcm.confluence import publish_capability_to_confluence
 from bcm.context_export import export_context
 from bcm.database import DatabaseOperations
 from bcm.layout_manager import process_layout
-from bcm.models import (AsyncSessionLocal, CapabilityCreate, CapabilityUpdate,
-                        LayoutModel, SettingsModel, TemplateSettings, get_db,
-                        init_db)
+from bcm.models import (AsyncSessionLocal, Capability, CapabilityCreate,
+                        CapabilityUpdate, LayoutModel, SettingsModel,
+                        TemplateSettings, get_db, init_db)
 from bcm.settings import Settings
 
 
@@ -1016,22 +1016,47 @@ def sanitize_filename(filename: str) -> str:
     # Limit length to 255 characters
     return sanitized[:255]
 
-@api_app.get("/context")
+@api_app.get(
+    "/context",
+    response_class=Response,  # Explicitly set response class instead of using return type annotation
+    responses={
+        200: {
+            "description": "Successfully exported context",
+            "content": {
+                "text/markdown": {
+                    "schema": {"type": "string"},
+                    "description": "Single markdown file containing the context"
+                },
+                "application/zip": {
+                    "schema": {"type": "string", "format": "binary"},
+                    "description": "ZIP archive containing multiple markdown files"
+                }
+            }
+        },
+        404: {"description": "No capabilities or content found"},
+        500: {"description": "Internal server error"}
+    },
+    description="""
+    Export the entire capability model context as markdown file(s).
+    Returns either a single markdown file or a ZIP archive containing multiple markdown files
+    depending on the size and complexity of the model.
+    The filename is derived from the root capability name.
+    """
+)
 async def get_context():
-    """Export entire capability model context as markdown files."""
     try:
         # First get capabilities to find root node
-        root_nodes = await db_ops.get_capabilities(parent_id=None)
+        root_nodes: List[Capability] = await db_ops.get_capabilities(parent_id=None)
         if not root_nodes:
             raise HTTPException(status_code=404, detail="No capabilities found")
         
         # Use first root node's name for filename
-        root_name = sanitize_filename(root_nodes[0].name)
+        root_name: str = sanitize_filename(root_nodes[0].name)
         if not root_name:
             root_name = "capability_model"  # fallback name
         
         # Get markdown content split into files
-        files = await export_context(db_ops)
+        files: List[Tuple[str, str]] = await export_context(db_ops)
         if not files:
             raise HTTPException(status_code=404, detail="No content to export")
         
