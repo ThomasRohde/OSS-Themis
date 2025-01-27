@@ -76,6 +76,10 @@ pip install -e .
 # Install frontend dependencies
 cd bcm-client
 npm install
+npm run build
+
+# Run Themis
+themis
 ```
 
 ## Development
