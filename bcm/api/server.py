@@ -20,9 +20,11 @@ from bcm.confluence import publish_capability_to_confluence
 from bcm.context_export import export_context
 from bcm.database import DatabaseOperations
 from bcm.layout_manager import process_layout
-from bcm.models import (AsyncSessionLocal, Capability, CapabilityCreate,
-                        CapabilityUpdate, LayoutModel, SettingsModel,
-                        TemplateSettings, get_db, init_db)
+from bcm.models import (AsyncSessionLocal, AuditLogEntry, Capability,
+                        CapabilityCreate, CapabilityMove, CapabilityUpdate,
+                        ConfluencePublishRequest, FormatRequest, ImportData,
+                        LayoutModel, PromptUpdate, SettingsModel,
+                        TemplateSettings, User, UserSession, get_db, init_db)
 from bcm.settings import Settings
 
 
@@ -179,7 +181,7 @@ async def serve_spa():
 
 @app.get("/{full_path:path}")
 async def serve_spa_routes(full_path: str):
-    if full_path.startswith("api/"):
+    if (full_path.startswith("api/")):
         raise HTTPException(status_code=404, detail="Not found")
     return FileResponse(os.path.join(static_client_dir, "index.html"))
 
@@ -298,45 +300,6 @@ db_ops = DatabaseOperations(AsyncSessionLocal)
 
 # In-memory user session storage
 active_users: Dict[str, dict] = {}
-
-class User(BaseModel):
-    nickname: str = Field(..., min_length=1, max_length=50)
-
-class UserSession(BaseModel):
-    session_id: str
-    nickname: str
-    locked_capabilities: List[int] = Field(default_factory=list)
-
-class CapabilityMove(BaseModel):
-    new_parent_id: Optional[int] = None
-    new_order: int
-
-class PromptUpdate(BaseModel):
-    prompt: str
-    capability_id: int
-    prompt_type: str = Field(..., pattern="^(first-level|expansion)$")
-
-class FormatRequest(BaseModel):
-    format: str = Field(..., pattern="^(archimate|powerpoint|svg|markdown|word|html|mermaid|plantuml)$")
-
-class ImportData(BaseModel):
-    data: List[dict]
-
-class ConfluencePublishRequest(BaseModel):
-    """Request model for publishing to Confluence."""
-    space_key: str = Field(..., description="Confluence space key")
-    token: str = Field(..., description="Confluence API token")
-    parent_page_title: Optional[str] = Field(None, description="Optional parent page title")
-    confluence_url: str = Field("https://your-domain.atlassian.net", description="Confluence instance URL")
-
-class AuditLogEntry(BaseModel):
-    timestamp: str
-    operation: str
-    capability_name: str
-    capability_id: Optional[int] = None
-    old_values: Optional[dict] = None
-    new_values: Optional[dict] = None
-
 
 @api_app.get("/settings", response_model=SettingsModel)
 async def get_settings():
@@ -771,7 +734,6 @@ async def update_description(
     session_id: str,
     db: AsyncSession = Depends(get_db)
 ):
-  
     """Update a capability's description."""
     if session_id not in active_users:
         raise HTTPException(status_code=404, detail="Session not found")

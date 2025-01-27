@@ -215,6 +215,45 @@ class PublishProgress(BaseModel):
     url: Optional[str] = None
 
 
+class User(BaseModel):
+    nickname: str = Field(..., min_length=1, max_length=50)
+
+class UserSession(BaseModel):
+    session_id: str
+    nickname: str
+    locked_capabilities: List[int] = Field(default_factory=list)
+
+class CapabilityMove(BaseModel):
+    new_parent_id: Optional[int] = None
+    new_order: int
+
+class PromptUpdate(BaseModel):
+    prompt: str
+    capability_id: int
+    prompt_type: str = Field(..., pattern="^(first-level|expansion)$")
+
+class FormatRequest(BaseModel):
+    format: str = Field(..., pattern="^(archimate|powerpoint|svg|markdown|word|html|mermaid|plantuml)$")
+
+class ImportData(BaseModel):
+    data: List[dict]
+
+class ConfluencePublishRequest(BaseModel):
+    """Request model for publishing to Confluence."""
+    space_key: str = Field(..., description="Confluence space key")
+    token: str = Field(..., description="Confluence API token")
+    parent_page_title: Optional[str] = Field(None, description="Optional parent page title")
+    confluence_url: str = Field("https://your-domain.atlassian.net", description="Confluence instance URL")
+
+class AuditLogEntry(BaseModel):
+    timestamp: str
+    operation: str
+    capability_name: str
+    capability_id: Optional[int] = None
+    old_values: Optional[dict] = None
+    new_values: Optional[dict] = None
+
+
 # Database setup
 def get_db_path():
     """Get absolute path to database file."""
