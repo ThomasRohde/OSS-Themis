@@ -1,7 +1,9 @@
 from typing import List
-from bcm.models import LayoutModel
+
 from bcm.layout_manager import process_layout
+from bcm.models import LayoutModel
 from bcm.settings import Settings
+
 
 def _format_description(description: str) -> str:
     """Format description text for markdown, handling newlines and quotes."""
@@ -46,17 +48,15 @@ def export_to_markdown(model: LayoutModel, settings: Settings) -> str:
     Returns:
         A string containing the markdown representation of the model
     """
-    # Process layout first
-    processed_model = process_layout(model, settings)
     
     # Start with title
     lines = [
-        f"# {processed_model.name}",
+        f"# {model.name}",
         "",
     ]
     
     # Process all nodes recursively
-    lines.extend(_process_node(processed_model))
+    lines.extend(_process_node(model))
     
     # Join all lines with newlines
     return '\n'.join(lines)

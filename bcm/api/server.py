@@ -2,19 +2,22 @@ import json
 import os
 import socket
 import uuid
+import zipfile
 from contextlib import asynccontextmanager
+from io import BytesIO
 from typing import Dict, List, Optional, Set
 
 from fastapi import (Depends, FastAPI, HTTPException, WebSocket,
                      WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bcm.api.export_handler import format_capability
 from bcm.confluence import publish_capability_to_confluence
+from bcm.context_export import export_context
 from bcm.database import DatabaseOperations
 from bcm.layout_manager import process_layout
 from bcm.models import (AsyncSessionLocal, CapabilityCreate, CapabilityUpdate,
@@ -1002,6 +1005,36 @@ async def get_capabilities(
             }
             for cap in capabilities
         ]
+
+@api_app.get("/context")
+async def get_context():
+    """Export entire capability model context as markdown files."""
+    try:
+        # Get markdown content split into files
+        files = await export_context(db_ops)
+        
+        # If only one file and small enough, return directly
+        if len(files) == 1:
+            return Response(
+                content=files[0][1],
+                media_type="text/markdown",
+                headers={"Content-Disposition": f"attachment; filename={files[0][0]}"}
+            )
+        
+        # Otherwise create zip file containing all parts
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for filename, content in files:
+                zip_file.writestr(filename, content)
+        
+        return Response(
+            content=zip_buffer.getvalue(),
+            media_type="application/zip",
+            headers={"Content-Disposition": "attachment; filename=context.zip"}
+        )
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 def main():
     import sys

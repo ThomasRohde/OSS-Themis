@@ -14,7 +14,7 @@ The tool excels at breaking down large organizational concepts into well-defined
 - Managing model evolution through comprehensive audit logging
 - Categorizing and organizing software systems that support business capabilities
 
-Perfect for enterprise architects, business analysts, and organizational designers who need to create clear, well-structured models of business functions, processes, or knowledge domains. The smart copy-paste feature makes it easy to leverage AI platforms like ChatGPT for capability generation and refinement while maintaining model integrity.
+Perfect for enterprise architects, business analysts, and organizational designers who need to create clear, well-structured models of business functions, processes, or knowledge domains. The smart copy-paste feature makes it easy to leverage AI platforms like [DanskeGPT](https://genaiportal.danskenet.net/danskegpt) for capability generation and refinement while maintaining model integrity.
 
 ## Features
 
