@@ -216,6 +216,17 @@ class PublishProgress(BaseModel):
 
 
 class User(BaseModel):
+    """Model for user creation requests."""
+    nickname: str
+
+class UserSession(BaseModel):
+    """Model for active user sessions."""
+    session_id: str
+    nickname: str
+    locked_capabilities: List[int] = []
+
+
+class User(BaseModel):
     nickname: str = Field(..., min_length=1, max_length=50)
 
 class UserSession(BaseModel):
