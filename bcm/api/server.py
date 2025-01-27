@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bcm.api.export_handler import format_capability
+from bcm.api.state import app_state
 from bcm.confluence import publish_capability_to_confluence
 from bcm.context_export import export_context
 from bcm.database import DatabaseOperations
@@ -27,6 +28,8 @@ from bcm.models import (AsyncSessionLocal, AuditLogEntry, Capability,
                         TemplateSettings, User, UserSession, get_db, init_db)
 from bcm.settings import Settings
 
+# Initialize database operations
+db_ops = DatabaseOperations(AsyncSessionLocal)
 
 def get_all_ipv4_addresses():
     """Get all available IPv4 addresses including VPN."""
@@ -185,121 +188,44 @@ async def serve_spa_routes(full_path: str):
         raise HTTPException(status_code=404, detail="Not found")
     return FileResponse(os.path.join(static_client_dir, "index.html"))
 
-# WebSocket connections manager
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}  # session_id -> websocket
-        self.session_to_user: Dict[str, str] = {}  # session_id -> nickname
-
-    async def connect(self, websocket: WebSocket, session_id: str, nickname: str):
-        await websocket.accept()
-        self.active_connections[session_id] = websocket
-        self.session_to_user[session_id] = nickname
-
-    def disconnect(self, session_id: str) -> Optional[str]:
-        """Disconnect a session and return the user's nickname if found"""
-        if session_id in self.active_connections:
-            del self.active_connections[session_id]
-        
-        nickname = None
-        if session_id in self.session_to_user:
-            nickname = self.session_to_user[session_id]
-            del self.session_to_user[session_id]
-            
-        # Clean up user session and locks
-        if session_id in active_users:
-            if not nickname:
-                nickname = active_users[session_id]["nickname"]
-            # Clear any locks held by the user
-            if active_users[session_id]["locked_capabilities"]:
-                active_users[session_id]["locked_capabilities"] = []
-            del active_users[session_id]
-            
-        return nickname
-
-    async def broadcast_model_change(self, user_nickname: str, action: str):
-        disconnected_sessions = []
-        for session_id, connection in self.active_connections.items():
-            try:
-                await connection.send_json({
-                    "type": "model_changed",
-                    "user": user_nickname,
-                    "action": action
-                })
-            except WebSocketDisconnect:
-                disconnected_sessions.append(session_id)
-        
-        # Clean up any disconnected sessions
-        for session_id in disconnected_sessions:
-            nickname = self.disconnect(session_id)
-            if nickname:
-                # Recursively broadcast that user left, but skip disconnected sessions
-                active_connections = dict(self.active_connections)  # Make a copy
-                for conn in active_connections.values():
-                    try:
-                        await conn.send_json({
-                            "type": "user_event",
-                            "user": nickname,
-                            "event": "left"
-                        })
-                    except WebSocketDisconnect:
-                        pass
-
-    async def broadcast_user_event(self, user_nickname: str, event_type: str):
-        disconnected_sessions = []
-        for session_id, connection in self.active_connections.items():
-            try:
-                await connection.send_json({
-                    "type": "user_event",
-                    "user": user_nickname,
-                    "event": event_type
-                })
-            except WebSocketDisconnect:
-                disconnected_sessions.append(session_id)
-        
-        # Clean up any disconnected sessions
-        for session_id in disconnected_sessions:
-            nickname = self.disconnect(session_id)
-            if nickname and nickname != user_nickname:  # Avoid recursive broadcast for same user
-                # Recursively broadcast that user left, but skip disconnected sessions
-                active_connections = dict(self.active_connections)  # Make a copy
-                for conn in active_connections.values():
-                    try:
-                        await conn.send_json({
-                            "type": "user_event",
-                            "user": nickname,
-                            "event": "left"
-                        })
-                    except WebSocketDisconnect:
-                        pass
-
-manager = ConnectionManager()
-
 @api_app.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
     # Verify session exists
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         await websocket.close(code=4000)
         return
         
-    nickname = active_users[session_id]["nickname"]
-    await manager.connect(websocket, session_id, nickname)
+    nickname = app_state.active_users[session_id]["nickname"]
+    await app_state.connection_manager.connect(websocket, session_id, nickname)
     
     try:
         while True:
             await websocket.receive_text()  # Keep connection alive
     except WebSocketDisconnect:
-        nickname = manager.disconnect(session_id)
+        nickname = app_state.connection_manager.disconnect(session_id)
         if nickname:
             # Broadcast user left event
-            await manager.broadcast_user_event(nickname, "left")
+            await app_state.connection_manager.broadcast_user_event(nickname, "left")
 
-
-# Initialize database operations
-db_ops = DatabaseOperations(AsyncSessionLocal)
-
-# In-memory user session storage
-active_users: Dict[str, dict] = {}
+# Update all other route handlers to use app_state instead of active_users
+@api_app.post("/users", response_model=UserSession)
+async def create_user_session(user: User):
+    """Create a new user session."""
+    # Check if nickname is already in use
+    if any(session["nickname"] == user.nickname for session in app_state.active_users.values()):
+        raise HTTPException(status_code=409, detail="Nickname is already in use")
+    
+    session_id = str(uuid.uuid4())
+    print("User joined:", user.nickname, session_id)
+    session = {
+        "session_id": session_id,
+        "nickname": user.nickname,
+        "locked_capabilities": []
+    }
+    app_state.active_users[session_id] = session
+    # Broadcast user joined event
+    await app_state.connection_manager.broadcast_user_event(user.nickname, "joined")
+    return UserSession(**session)
 
 @api_app.get("/settings", response_model=SettingsModel)
 async def get_settings():
@@ -400,7 +326,7 @@ async def update_settings(settings_update: SettingsModel):
 async def create_user_session(user: User):
     """Create a new user session."""
     # Check if nickname is already in use
-    if any(session["nickname"] == user.nickname for session in active_users.values()):
+    if any(session["nickname"] == user.nickname for session in app_state.active_users.values()):
         raise HTTPException(status_code=409, detail="Nickname is already in use")
     
     session_id = str(uuid.uuid4())
@@ -410,37 +336,37 @@ async def create_user_session(user: User):
         "nickname": user.nickname,
         "locked_capabilities": []
     }
-    active_users[session_id] = session
+    app_state.active_users[session_id] = session
     # Broadcast user joined event
-    await manager.broadcast_user_event(user.nickname, "joined")
+    await app_state.connection_manager.broadcast_user_event(user.nickname, "joined")
     return UserSession(**session)
 
 @api_app.get("/users", response_model=List[UserSession])
 async def get_active_users():
     """Get all active users and their locked capabilities."""
-    return [UserSession(**session) for session in active_users.values()]
+    return [UserSession(**session) for session in app_state.active_users.values()]
 
 @api_app.delete("/users/{session_id}")
 async def remove_user_session(session_id: str):
     """Remove a user session and clear any locks held by the user."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Get user info before removing
-    user = active_users[session_id]
+    user = app_state.active_users[session_id]
     nickname = user["nickname"]
     
     # Clear any locks held by the user
     if user["locked_capabilities"]:
         user["locked_capabilities"] = []
         # Broadcast that locks were cleared
-        await manager.broadcast_model_change(nickname, "cleared their capability locks")
+        await app_state.connection_manager.broadcast_model_change(nickname, "cleared their capability locks")
     
     # Remove the user session
-    del active_users[session_id]
+    del app_state.active_users[session_id]
     
     # Broadcast user left event
-    await manager.broadcast_user_event(nickname, "left")
+    await app_state.connection_manager.broadcast_user_event(nickname, "left")
     
     return {"message": "Session removed and locks cleared"}
 
@@ -448,7 +374,7 @@ async def remove_user_session(session_id: str):
 async def lock_capability(capability_id: int, nickname: str, db: AsyncSession = Depends(get_db)):
     """Lock a capability for editing."""
     # Find user by nickname
-    user_session = next((session for session in active_users.values() if session["nickname"] == nickname), None)
+    user_session = next((session for session in app_state.active_users.values() if session["nickname"] == nickname), None)
     if not user_session:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -461,7 +387,7 @@ async def lock_capability(capability_id: int, nickname: str, db: AsyncSession = 
     current_parent_id = capability.parent_id
     while current_parent_id is not None:
         # Check if parent is locked by any user
-        for user in active_users.values():
+        for user in app_state.active_users.values():
             if current_parent_id in user["locked_capabilities"]:
                 # Parent is locked, silently ignore the lock request
                 return {"message": "Capability is already locked by inheritance"}
@@ -473,14 +399,14 @@ async def lock_capability(capability_id: int, nickname: str, db: AsyncSession = 
         current_parent_id = parent.parent_id
     
     # Check if capability itself is already locked
-    for user in active_users.values():
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"]:
             raise HTTPException(status_code=409, detail="Capability is already locked")
     
     # No ancestor locks found, proceed with locking
     user_session["locked_capabilities"].append(capability_id)
     # Broadcast lock change
-    await manager.broadcast_model_change(
+    await app_state.connection_manager.broadcast_model_change(
         user_session["nickname"],
         f"locked capability '{capability.name}'"
     )
@@ -490,7 +416,7 @@ async def lock_capability(capability_id: int, nickname: str, db: AsyncSession = 
 async def unlock_capability(capability_id: int, nickname: str, db: AsyncSession = Depends(get_db)):
     """Unlock a capability."""
     # Find user by nickname
-    user_session = next((session for session in active_users.values() if session["nickname"] == nickname), None)
+    user_session = next((session for session in app_state.active_users.values() if session["nickname"] == nickname), None)
     if not user_session:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -502,7 +428,7 @@ async def unlock_capability(capability_id: int, nickname: str, db: AsyncSession 
             
         user_session["locked_capabilities"].remove(capability_id)
         # Broadcast unlock change
-        await manager.broadcast_model_change(
+        await app_state.connection_manager.broadcast_model_change(
             user_session["nickname"],
             f"unlocked capability '{capability.name}'"
         )
@@ -517,13 +443,13 @@ async def create_capability(
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new capability."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     result = await db_ops.create_capability(capability, db)
     # Notify all clients about model change
-    await manager.broadcast_model_change(
-        active_users[session_id]["nickname"],
+    await app_state.connection_manager.broadcast_model_change(
+        app_state.active_users[session_id]["nickname"],
         f"created capability '{result.name}'"
     )
     return {
@@ -540,14 +466,14 @@ async def import_capabilities(
     db: AsyncSession = Depends(get_db)
 ):
     """Import capabilities from JSON data."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     try:
         await db_ops.import_capabilities(import_data.data)
         # Notify all clients about model change
-        await manager.broadcast_model_change(
-            active_users[session_id]["nickname"],
+        await app_state.connection_manager.broadcast_model_change(
+            app_state.active_users[session_id]["nickname"],
             "imported capabilities"
         )
         return {"message": "Capabilities imported successfully"}
@@ -560,7 +486,7 @@ async def export_capabilities(
     db: AsyncSession = Depends(get_db)
 ):
     """Export capabilities to JSON."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     try:
@@ -636,12 +562,12 @@ async def update_capability(
     db: AsyncSession = Depends(get_db)
 ):
     """Update a capability."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Check if capability is locked by another user
-    current_user = active_users[session_id]
-    for user in active_users.values():
+    current_user = app_state.active_users[session_id]
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"] and user["nickname"] != current_user["nickname"]:
             raise HTTPException(status_code=409, detail="Capability is locked by another user")
     
@@ -649,8 +575,8 @@ async def update_capability(
     if not result:
         raise HTTPException(status_code=404, detail="Capability not found")
     # Notify all clients about model change
-    await manager.broadcast_model_change(
-        active_users[session_id]["nickname"],
+    await app_state.connection_manager.broadcast_model_change(
+        app_state.active_users[session_id]["nickname"],
         f"updated capability '{result.name}'"
     )
     return {
@@ -667,12 +593,12 @@ async def delete_capability(
     db: AsyncSession = Depends(get_db)
 ):
     """Delete a capability."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Check if capability is locked by another user
-    current_user = active_users[session_id]
-    for user in active_users.values():
+    current_user = app_state.active_users[session_id]
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"] and user["nickname"] != current_user["nickname"]:
             raise HTTPException(status_code=409, detail="Capability is locked by another user")
     
@@ -685,8 +611,8 @@ async def delete_capability(
     if not result:
         raise HTTPException(status_code=404, detail="Capability not found")
     # Notify all clients about model change
-    await manager.broadcast_model_change(
-        active_users[session_id]["nickname"],
+    await app_state.connection_manager.broadcast_model_change(
+        app_state.active_users[session_id]["nickname"],
         f"deleted capability '{capability.name}'"
     )
     return {"message": "Capability deleted"}
@@ -699,12 +625,12 @@ async def move_capability(
     db: AsyncSession = Depends(get_db)
 ):
     """Move a capability to a new parent and/or position."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Check if capability is locked by another user
-    current_user = active_users[session_id]
-    for user in active_users.values():
+    current_user = app_state.active_users[session_id]
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"] and user["nickname"] != current_user["nickname"]:
             raise HTTPException(status_code=409, detail="Capability is locked by another user")
     
@@ -721,8 +647,8 @@ async def move_capability(
     if not result:
         raise HTTPException(status_code=404, detail="Capability not found")
     # Notify all clients about model change
-    await manager.broadcast_model_change(
-        active_users[session_id]["nickname"],
+    await app_state.connection_manager.broadcast_model_change(
+        app_state.active_users[session_id]["nickname"],
         f"moved capability '{capability.name}'"
     )
     return {"message": "Capability moved successfully"}
@@ -735,12 +661,12 @@ async def update_description(
     db: AsyncSession = Depends(get_db)
 ):
     """Update a capability's description."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Check if capability is locked by another user
-    current_user = active_users[session_id]
-    for user in active_users.values():
+    current_user = app_state.active_users[session_id]
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"] and user["nickname"] != current_user["nickname"]:
             raise HTTPException(status_code=409, detail="Capability is locked by another user")
     
@@ -756,12 +682,12 @@ async def update_prompt(
     session_id: str
 ):
     """Update a capability's first-level or expansion prompt."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Check if capability is locked by another user
-    current_user = active_users[session_id]
-    for user in active_users.values():
+    current_user = app_state.active_users[session_id]
+    for user in app_state.active_users.values():
         if capability_id in user["locked_capabilities"] and user["nickname"] != current_user["nickname"]:
             raise HTTPException(status_code=409, detail="Capability is locked by another user")
     
@@ -808,18 +734,18 @@ async def format_node(
 @api_app.post("/clearlocks")
 async def clear_all_locks(session_id: str):
     """Clear all capability locks and notify users."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     # Get the user who initiated the clear
-    current_user = active_users[session_id]
+    current_user = app_state.active_users[session_id]
     
     # Clear all locks from all users
-    for user in active_users.values():
+    for user in app_state.active_users.values():
         user["locked_capabilities"] = []
     
     # Broadcast the clear locks action
-    await manager.broadcast_model_change(
+    await app_state.connection_manager.broadcast_model_change(
         current_user["nickname"],
         "cleared all capability locks"
     )
@@ -862,7 +788,7 @@ async def publish_to_confluence(
     - url: URL of the published page (on success)
     - error: Error message (if an error occurs)
     """
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     async def progress_stream():
@@ -880,8 +806,8 @@ async def publish_to_confluence(
                 yield json.dumps(progress.model_dump()) + "\n"
             
             # After successful completion, notify all clients
-            await manager.broadcast_model_change(
-                active_users[session_id]["nickname"],
+            await app_state.connection_manager.broadcast_model_change(
+                app_state.active_users[session_id]["nickname"],
                 f"published to Confluence"
             )
             
@@ -913,7 +839,7 @@ async def get_audit_logs():
 @api_app.post("/reset")
 async def reset_database(session_id: str):
     """Reset database and clear locks but preserve sessions and users."""
-    if session_id not in active_users:
+    if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")
     
     try:
@@ -921,12 +847,12 @@ async def reset_database(session_id: str):
         await db_ops.clear_all_capabilities()
         
         # Clear all locks from users while preserving sessions
-        for user in active_users.values():
+        for user in app_state.active_users.values():
             user["locked_capabilities"] = []
             
         # Broadcast the reset action
-        await manager.broadcast_model_change(
-            active_users[session_id]["nickname"],
+        await app_state.connection_manager.broadcast_model_change(
+            app_state.active_users[session_id]["nickname"],
             "reset database and cleared all locks"
         )
         
