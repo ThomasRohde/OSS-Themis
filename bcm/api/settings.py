@@ -31,13 +31,11 @@ async def get_settings():
     )
     
     return SettingsModel(
-        theme=settings.get("theme"),
         max_ai_capabilities=settings.get("max_ai_capabilities"),
         first_level_range=settings.get("first_level_range"),
         first_level_template=first_level_template,
         normal_template=normal_template,
         font_size=settings.get("font_size"),
-        model=settings.get("model"),
         context_include_parents=settings.get("context_include_parents"),
         context_include_siblings=settings.get("context_include_siblings"),
         context_first_level=settings.get("context_first_level"),
@@ -68,7 +66,6 @@ async def update_settings(settings_update: SettingsModel):
     settings = Settings()
     
     # Update each setting
-    settings.set("theme", settings_update.theme)
     settings.set("max_ai_capabilities", settings_update.max_ai_capabilities)
     settings.set("first_level_range", settings_update.first_level_range)
     settings.set("first_level_template", 
@@ -80,7 +77,6 @@ async def update_settings(settings_update: SettingsModel):
                 if isinstance(settings_update.normal_template, TemplateSettings) 
                 else settings_update.normal_template)
     settings.set("font_size", settings_update.font_size)
-    settings.set("model", settings_update.model)
     settings.set("context_include_parents", settings_update.context_include_parents)
     settings.set("context_include_siblings", settings_update.context_include_siblings)
     settings.set("context_first_level", settings_update.context_first_level)
