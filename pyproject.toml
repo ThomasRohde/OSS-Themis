@@ -40,6 +40,8 @@ dependencies = [
     "python-docx>=1.1.2",
     "json-repair>=0.35.0",
     "atlassian-python-api>=3.41.18",
+    "python-certifi-win32",
+    "pip-system-certs" 
 ]
 requires-python = ">=3.11"
 
