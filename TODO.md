@@ -1,0 +1,1 @@
+- Remove settings not relevant for onprem
