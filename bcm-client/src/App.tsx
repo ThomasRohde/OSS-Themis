@@ -88,35 +88,62 @@ const MainApp: React.FC = () => {
   }
 
   // Create a reusable header component
-  const Header = () => (
-    <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end items-center">
-          <div className="flex items-center space-x-4">
-            {settings && (
-              <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
-                <span className="text-sm font-medium text-gray-700">
-                  Prompts: {getTemplateDisplayName(settings.first_level_template)} → {getTemplateDisplayName(settings.normal_template)} / Logged in as: {userSession.nickname} / Active users: {activeUsers.length}
-                </span>
-              </div>
-            )}
-            <button
-              onClick={() => ApiClient.clearLocks(userSession.session_id)}
-              className="px-3 py-2 text-sm bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-            >
-              Clear Locks
-            </button>
-            <button
-              onClick={logout}
-              className="px-3 py-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
-            >
-              Logout
-            </button>
+  const Header = () => {
+    const handleExport = async () => {
+      try {
+        const blob = await ApiClient.exportContext();
+        const contentType = blob.type;
+        const fileExtension = contentType === 'application/zip' ? '.zip' : '.md';
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `context-export${fileExtension}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Export failed:', error);
+      }
+    };
+
+    return (
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex justify-end items-center">
+            <div className="flex items-center space-x-4">
+              {settings && (
+                <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                  <span className="text-sm font-medium text-gray-700">
+                    Prompts: {getTemplateDisplayName(settings.first_level_template)} → {getTemplateDisplayName(settings.normal_template)} / Logged in as: {userSession.nickname} / Active users: {activeUsers.length}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={handleExport}
+                className="px-3 py-2 text-sm bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                Export Context
+              </button>
+              <button
+                onClick={() => ApiClient.clearLocks(userSession.session_id)}
+                className="px-3 py-2 text-sm bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+              >
+                Clear Locks
+              </button>
+              <button
+                onClick={logout}
+                className="px-3 py-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
-  );
+      </header>
+    );
+  };
 
   return (
     <BrowserRouter>

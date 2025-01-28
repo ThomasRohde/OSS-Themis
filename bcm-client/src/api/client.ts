@@ -6,21 +6,10 @@ import type {
   CapabilityCreate,
   CapabilityMove,
   CapabilityUpdate,
-  ConfluencePublishRequest, // Add this type import
+  ConfluencePublishRequest,
   LayoutModel,
   PromptUpdate,
-  PublishProgress // Add this type import
-  ,
-
-
-
-
-
-
-
-
-
-
+  PublishProgress,
   Settings,
   User,
   UserSession
@@ -256,6 +245,14 @@ export const ApiClient = {
   // Reset database and clear locks
   resetDatabase: async (sessionId: string): Promise<void> => {
     await api.post(`/api/reset?session_id=${sessionId}`);
+  },
+
+  // Export context as markdown or zip
+  exportContext: async (): Promise<Blob> => {
+    const response = await api.get('/api/context', {
+      responseType: 'blob',
+    });
+    return response.data;
   },
 
   // Publish to Atlassian Confluence
