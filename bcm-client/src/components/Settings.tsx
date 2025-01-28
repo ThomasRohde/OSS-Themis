@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ApiClient } from '../api/client';
 import { useSettings } from '../contexts/SettingsContext';
 import { Settings, TemplateSettings } from '../types/api';
@@ -53,6 +53,8 @@ export default function SettingsComponent() {
     colors: false
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -103,6 +105,36 @@ export default function SettingsComponent() {
     });
   };
 
+  const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+        setSettings(json);
+      } catch (error) {
+        console.error('Failed to parse settings file:', error);
+        alert('Invalid settings file format');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleSaveToFile = () => {
+    const settingsJson = JSON.stringify(settings, null, 2);
+    const blob = new Blob([settingsJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'themis-settings.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return <div className="p-4">Loading settings...</div>;
   }
@@ -111,7 +143,31 @@ export default function SettingsComponent() {
     <div className="p-4 max-w-4xl mx-auto">
       <BackButton />
 
-      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <div className="space-x-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileLoad}
+            accept=".json"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Load Settings
+          </button>
+          <button
+            onClick={handleSaveToFile}
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Save Settings
+          </button>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Look & Feel Section */}
         <section className="space-y-4">
