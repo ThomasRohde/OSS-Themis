@@ -5,7 +5,7 @@ import markdown
 from atlassian import Confluence
 
 from bcm.database import DatabaseOperations
-from bcm.html_export import export_to_html_macro
+from bcm.html_export import export_to_html_macro, export_to_svg_macro
 from bcm.models import LayoutModel, PublishProgress
 from bcm.settings import Settings
 
@@ -59,7 +59,7 @@ class ConfluenceFormatter:
         layout_model = LayoutModel.convert_to_layout_format(layout_data, max_level)
         
         # Generate HTML layout and wrap in Confluence HTML macro
-        html_content = export_to_html_macro(layout_model, settings)
+        html_content = export_to_svg_macro(layout_model, settings)
         wrapped_content = f"""<ac:structured-macro ac:macro-id="128a5fdd-f45d-4300-b6fe-4fc28e6f21b1" ac:name="html" ac:schema-version="1">
  <ac:plain-text-body><![CDATA[{html_content}]]></ac:plain-text-body>
 </ac:structured-macro>"""
@@ -91,7 +91,7 @@ class ConfluenceFormatter:
         layout_model = LayoutModel.convert_to_layout_format(layout_data, max_level)
         
         # Generate HTML layout
-        html_content = export_to_html_macro(layout_model, settings)
+        html_content = export_to_svg_macro(layout_model, settings)
         wrapped_content = f"""<ac:structured-macro ac:macro-id="128a5fdd-f45d-4300-b6fe-4fc28e6f21b1" ac:name="html" ac:schema-version="1">
  <ac:plain-text-body><![CDATA[{html_content}]]></ac:plain-text-body>
 </ac:structured-macro>"""

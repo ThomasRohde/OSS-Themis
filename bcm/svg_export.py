@@ -1,11 +1,12 @@
 import math
-from typing import List
-import xml.etree.ElementTree as ET
 import textwrap
+import xml.etree.ElementTree as ET
+from typing import List
 
-from bcm.models import LayoutModel
 from bcm.layout_manager import process_layout
+from bcm.models import LayoutModel
 from bcm.settings import Settings
+
 
 def create_svg_element(width: int, height: int) -> ET.Element:
     """Create the root SVG element with given dimensions."""
@@ -91,31 +92,31 @@ def add_node_to_svg(
     svg: ET.Element, node: LayoutModel, settings: Settings, level: int = 0
 ):
     """Add a node and its children to the SVG."""
-    # Create group for this node
     g = ET.SubElement(svg, "g")
 
-    # Determine node color based on level and whether it has children
     if not node.children:
         color = settings.get("color_leaf")
     else:
         color = settings.get(f"color_{min(level, 6)}")
 
-    # Add rectangle for node
-    ET.SubElement(
-        g,
-        "rect",
-        {
-            "x": str(node.x),
-            "y": str(node.y),
-            "width": str(node.width),
-            "height": str(node.height),
-            "fill": color,
-            "rx": "5",
-            "ry": "5",
-            "stroke": "#333333",
-            "stroke-width": "1",
-        },
-    )
+    # Add rectangle with tooltip
+    rect_attrs = {
+        "x": str(node.x),
+        "y": str(node.y),
+        "width": str(node.width),
+        "height": str(node.height),
+        "fill": color,
+        "rx": "5",
+        "ry": "5",
+        "stroke": "#333333",
+        "stroke-width": "1",
+    }
+    
+    # Add tooltip if description exists
+    if node.description:
+        rect_attrs["data-tippy-content"] = "node.description"
+    
+    ET.SubElement(g, "rect", rect_attrs)
 
     # Add wrapped text with appropriate positioning
     add_wrapped_text(
@@ -137,20 +138,34 @@ def add_node_to_svg(
 
 
 def export_to_svg(model: LayoutModel, settings: Settings) -> str:
-    """Export the capability model to SVG format."""
-    # Process layout
+    """Export the capability model to SVG format with tooltips."""
     processed_model = process_layout(model, settings)
-
-    # Create SVG with padding
     padding = settings.get("padding", 20)
     width = math.ceil(processed_model.width + 2 * padding)
     height = math.ceil(processed_model.height + 2 * padding)
-
-    # Create SVG element
+    
     svg = create_svg_element(width, height)
-
-    # Add nodes recursively
     add_node_to_svg(svg, processed_model, settings)
+    
+    svg_string = ET.tostring(svg, encoding="unicode", method="xml")
+    
+    # Create complete HTML with Tippy.js integration
+    html_template = f'''<div id="svg-container">
+{svg_string}
+</div>
 
-    # Convert to string
-    return ET.tostring(svg, encoding="unicode", method="xml")
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+
+<script>
+    // Initialise Tippy.js within Confluence
+    document.addEventListener("DOMContentLoaded", function() {{
+        tippy('#svg-container rect', {{
+            placement: 'right', // Tooltip position
+        }});
+    }});
+</script>
+'''
+    
+    return html_template
