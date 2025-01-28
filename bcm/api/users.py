@@ -2,9 +2,10 @@ import uuid
 from typing import List
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 
 from bcm.api.state import app_state
-from bcm.models import User, UserSession
+from bcm.models import HTTPError, User, UserSession
 
 router = APIRouter(
     prefix="/users",
@@ -15,12 +16,12 @@ router = APIRouter(
     "",
     response_model=UserSession,
     responses={
-        200: {"description": "Successfully created user session"},
-        409: {"description": "Nickname already in use"}
+        200: {"model": UserSession, "description": "Successfully created user session"},
+        409: {"model": HTTPError, "description": "Nickname already in use"}
     },
     description="Create a new user session and broadcast join event to other users"
 )
-async def create_user_session(user: User):
+async def create_user_session(user: User) -> UserSession:
     """Create a new user session."""
     # Check if nickname is already in use
     if any(session["nickname"] == user.nickname for session in app_state.active_users.values()):
@@ -41,21 +42,32 @@ async def create_user_session(user: User):
 @router.get(
     "",
     response_model=List[UserSession],
+    responses={
+        200: {"model": List[UserSession], "description": "List of active users"}
+    },
     description="Get list of all active users and their locked capabilities"
 )
-async def get_active_users():
+async def get_active_users() -> List[UserSession]:
     """Get all active users and their locked capabilities."""
     return [UserSession(**session) for session in app_state.active_users.values()]
 
 @router.delete(
     "/{session_id}",
     responses={
-        200: {"description": "Session removed and locks cleared"},
-        404: {"description": "Session not found"}
+        200: {
+            "model": dict,
+            "description": "Session removed and locks cleared",
+            "content": {
+                "application/json": {
+                    "example": {"message": "Session removed and locks cleared"}
+                }
+            }
+        },
+        404: {"model": HTTPError, "description": "Session not found"}
     },
     description="Remove a user session and clear any locks held by the user"
 )
-async def remove_user_session(session_id: str):
+async def remove_user_session(session_id: str) -> dict:
     """Remove a user session and clear any locks held by the user."""
     if session_id not in app_state.active_users:
         raise HTTPException(status_code=404, detail="Session not found")

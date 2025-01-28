@@ -223,8 +223,21 @@ class UserSession(BaseModel):
     """Model for active user sessions."""
     session_id: str
     nickname: str
-    locked_capabilities: List[int] = []
+    locked_capabilities: List[int] = Field(default_factory=list)
 
+    class Config:
+        # Enable json_schema_extra for OpenAPI documentation
+        json_schema_extra = {
+            "example": {
+                "session_id": "550e8400-e29b-41d4-a716-446655440000",
+                "nickname": "john_doe",
+                "locked_capabilities": [1, 2, 3]
+            }
+        }
+
+class HTTPError(BaseModel):
+    """Model for HTTP error responses."""
+    detail: str
 
 class User(BaseModel):
     nickname: str = Field(..., min_length=1, max_length=50)
