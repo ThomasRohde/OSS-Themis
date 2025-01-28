@@ -12,11 +12,11 @@ export default function SettingsComponent() {
     first_level_range: '5-10',
     first_level_template: {
       selected: 'first_level_prompt.j2',
-      available: ['first_level_prompt.j2', 'first_level_prompt_gpt.j2']
+      available: ['first_level_prompt.j2', 'first_level_prompt.j2']
     },
     normal_template: {
       selected: 'expansion_prompt.j2',
-      available: ['expansion_prompt.j2', 'expansion_prompt_gpt.j2']
+      available: ['expansion_prompt.j2', 'expansion_prompt.j2']
     },
     font_size: 10,
     model: 'openai:gpt-4',
