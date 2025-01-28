@@ -198,12 +198,12 @@ export const ApiClient = {
 
   // Export/Import operations
   exportCapabilities: async (sessionId: string): Promise<Capability[]> => {
-    const response = await api.get<Capability[]>(`/api/capabilities/export?session_id=${sessionId}`);
+    const response = await api.get<Capability[]>(`/api/export?session_id=${sessionId}`);
     return response.data;
   },
 
   importCapabilities: async (data: Capability[], sessionId: string): Promise<void> => {
-    await api.post(`/api/capabilities/import?session_id=${sessionId}`, {
+    await api.post(`/api/import?session_id=${sessionId}`, {
       data: data
     });
   },
@@ -263,7 +263,7 @@ export const ApiClient = {
     onProgress?: (progress: PublishProgress) => void
   ): Promise<void> => {
     const response = await api.post(
-      `/api/capabilities/${capabilityId}/publish/confluence?session_id=${sessionId}`,
+      `/api/confluence/${capabilityId}?session_id=${sessionId}`,
       request,
       {
         responseType: 'text',
@@ -283,7 +283,8 @@ export const ApiClient = {
                     throw new Error(progress.error);
                   }
                 }
-              } catch (e) {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              } catch (_) {
                 // Ignore parsing errors for incomplete lines
               }
             }
