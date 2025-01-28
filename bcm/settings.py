@@ -10,13 +10,12 @@ TOP_PADDING_DEFAULT = 40  # Slightly larger than standard padding by default
 DEFAULT_TARGET_ASPECT_RATIO_DEFAULT = 1.0
 
 DEFAULT_SETTINGS = {
-    "theme": "litera",  # Default ttkbootstrap theme
+    # General settings
     "max_ai_capabilities": 10,  # Default max number of AI-generated capabilities
     "first_level_range": "5-10",  # Default range for first level capabilities
     "first_level_template": "first_level_prompt.j2",  # Default first level template
     "normal_template": "expansion_prompt.j2",  # Default normal template
     "font_size": 10,  # Default font size for main text content
-    "model": "openai:gpt-4o",  # Default model
     # Context settings
     "context_include_parents": True,  # Include parent nodes in context
     "context_include_siblings": True,  # Include sibling nodes in context
@@ -44,25 +43,7 @@ DEFAULT_SETTINGS = {
     "color_leaf": "#E0E0E0",  # Light grey
 }
 
-# Available themes in ttkbootstrap
-AVAILABLE_THEMES = [
-    "cosmo",
-    "flatly",
-    "litera",
-    "minty",
-    "lumen",
-    "sandstone",
-    "yeti",
-    "pulse",
-    "united",
-    "morph",
-    "journal",
-    "darkly",
-    "superhero",
-    "solar",
-    "cyborg",
-    "vapor",
-]
+
 class Settings:
     def __init__(self):
         self.settings_dir = Path.home() / ".pybcm"

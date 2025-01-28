@@ -83,13 +83,11 @@ export interface AuditLogEntry {
 }
 
 export interface Settings {
-  theme: string;
   max_ai_capabilities: number;
   first_level_range: string;
   first_level_template: string | TemplateSettings;
   normal_template: string | TemplateSettings;
   font_size: number;
-  model: string;
   context_include_parents: boolean;
   context_include_siblings: boolean;
   context_first_level: boolean;

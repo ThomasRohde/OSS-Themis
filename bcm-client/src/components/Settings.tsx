@@ -7,7 +7,6 @@ import BackButton from './BackButton';
 export default function SettingsComponent() {
   const { settings: contextSettings, updateSettings } = useSettings();
   const [settings, setSettings] = useState<Settings>(contextSettings || {
-    theme: 'litera',
     max_ai_capabilities: 10,
     first_level_range: '5-10',
     first_level_template: {
@@ -19,7 +18,6 @@ export default function SettingsComponent() {
       available: ['expansion_prompt.j2', 'expansion_prompt.j2']
     },
     font_size: 10,
-    model: 'openai:gpt-4',
     context_include_parents: true,
     context_include_siblings: true,
     context_first_level: true,
@@ -133,18 +131,7 @@ export default function SettingsComponent() {
           </button>
           {expandedSections.lookAndFeel && (
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Theme</label>
-              <select
-                value={settings.theme}
-                onChange={e => handleChange('theme', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                {['cosmo', 'flatly', 'litera', 'minty', 'lumen', 'sandstone', 'yeti', 'pulse', 'united', 'morph', 'journal', 'darkly', 'superhero', 'solar', 'cyborg', 'vapor'].map(theme => (
-                  <option key={theme} value={theme}>{theme}</option>
-                ))}
-              </select>
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Font Size</label>
               <input
@@ -191,15 +178,6 @@ export default function SettingsComponent() {
                 type="text"
                 value={settings.first_level_range}
                 onChange={e => handleChange('first_level_range', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Model</label>
-              <input
-                type="text"
-                value={settings.model}
-                onChange={e => handleChange('model', e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
