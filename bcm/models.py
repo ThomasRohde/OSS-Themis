@@ -179,7 +179,6 @@ class SettingsModel(BaseModel):
     first_level_range: str = Field(default="5-10")
     first_level_template: Union[str, TemplateSettings] = Field(default="first_level_prompt.j2")
     normal_template: Union[str, TemplateSettings] = Field(default="expansion_prompt.j2")
-    font_size: int = Field(default=10)
     context_include_parents: bool = Field(default=True, alias="context_include_parents")
     context_include_siblings: bool = Field(default=True, alias="context_include_siblings")
     context_first_level: bool = Field(default=True, alias="context_first_level")

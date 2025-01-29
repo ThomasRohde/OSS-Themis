@@ -17,7 +17,6 @@ export default function SettingsComponent() {
       selected: 'expansion_prompt.j2',
       available: ['expansion_prompt.j2', 'expansion_prompt.j2']
     },
-    font_size: 10,
     context_include_parents: true,
     context_include_siblings: true,
     context_first_level: true,
@@ -169,38 +168,6 @@ export default function SettingsComponent() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Look & Feel Section */}
-        <section className="space-y-4">
-          <button
-            onClick={() => toggleSection('lookAndFeel')}
-            className="w-full flex items-center justify-between text-xl font-semibold py-2 hover:bg-gray-50"
-          >
-            <h2>Look & Feel</h2>
-            <svg
-              className={`w-6 h-6 transform transition-transform ${expandedSections.lookAndFeel ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {expandedSections.lookAndFeel && (
-          <div className="grid grid-cols-2 gap-4">
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Font Size</label>
-              <input
-                type="number"
-                value={settings.font_size}
-                onChange={e => handleChange('font_size', parseInt(e.target.value))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          )}
-        </section>
-
         {/* AI Generation Section */}
         <section className="space-y-4">
           <button

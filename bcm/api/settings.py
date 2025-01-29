@@ -35,7 +35,6 @@ async def get_settings():
         first_level_range=settings.get("first_level_range"),
         first_level_template=first_level_template,
         normal_template=normal_template,
-        font_size=settings.get("font_size"),
         context_include_parents=settings.get("context_include_parents"),
         context_include_siblings=settings.get("context_include_siblings"),
         context_first_level=settings.get("context_first_level"),
@@ -76,7 +75,6 @@ async def update_settings(settings_update: SettingsModel):
                 settings_update.normal_template.selected 
                 if isinstance(settings_update.normal_template, TemplateSettings) 
                 else settings_update.normal_template)
-    settings.set("font_size", settings_update.font_size)
     settings.set("context_include_parents", settings_update.context_include_parents)
     settings.set("context_include_siblings", settings_update.context_include_siblings)
     settings.set("context_first_level", settings_update.context_first_level)

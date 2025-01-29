@@ -87,7 +87,6 @@ export interface Settings {
   first_level_range: string;
   first_level_template: string | TemplateSettings;
   normal_template: string | TemplateSettings;
-  font_size: number;
   context_include_parents: boolean;
   context_include_siblings: boolean;
   context_first_level: boolean;
