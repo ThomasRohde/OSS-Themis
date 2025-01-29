@@ -3,6 +3,8 @@ import textwrap  # Add this import at the top
 import xml.etree.ElementTree as ET
 from typing import List
 
+import markdown  # Changed from markdown2
+
 from bcm.layout_manager import process_layout
 from bcm.models import LayoutModel
 from bcm.settings import Settings
@@ -268,7 +270,9 @@ def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
         }
         
         if node.description:
-            rect_attrs["data-tippy-content"] = node.description
+            # Convert markdown description to HTML using markdown package
+            html_description = markdown.markdown(node.description)
+            rect_attrs["data-tippy-content"] = html_description
             
         ET.SubElement(g, "rect", rect_attrs)
         # Add wrapped text with appropriate positioning
@@ -296,6 +300,7 @@ def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+<link rel="stylesheet" href="https://unpkg.com/tippy.js/themes/light.css">
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
 
@@ -304,7 +309,9 @@ def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
     document.addEventListener("DOMContentLoaded", function() {{
         tippy('#svg-container rect', {{
             placement: 'right', // Tooltip position
-            maxWidth: '35%'
+            maxWidth: '35%',
+            allowHTML: true, // Allow HTML content
+            theme: 'light', // Light theme
         }});
     }});
 </script>'''

@@ -163,7 +163,8 @@ def export_to_svg(model: LayoutModel, settings: Settings) -> str:
     document.addEventListener("DOMContentLoaded", function() {{
         tippy('#svg-container rect', {{
             placement: 'right', // Tooltip position
-            maxWidth: '35%'
+            maxWidth: '35%',
+            allowHTML: true, // Allow HTML content
         }});
     }});
 </script>
