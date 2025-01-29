@@ -1,12 +1,13 @@
 import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bcm.models import AsyncSessionLocal, ConfluencePublishRequest, get_db
-from bcm.confluence import publish_capability_to_confluence
 from bcm.api.state import app_state
+from bcm.confluence_publish import publish_capability_to_confluence
 from bcm.database import DatabaseOperations
+from bcm.models import AsyncSessionLocal, ConfluencePublishRequest, get_db
 
 # Initialize database operations
 db_ops = DatabaseOperations(AsyncSessionLocal)

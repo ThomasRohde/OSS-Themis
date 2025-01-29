@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from bcm.confluence import ConfluencePublisher
+from bcm.confluence_publish import ConfluencePublisher
 
 
 def convert(text: str) -> str:

@@ -25,14 +25,14 @@ def create_svg_element(width: int, height: int) -> ET.Element:
 def calculate_font_size(root_size: int, level: int, is_leaf: bool) -> int:
     """Calculate font size based on level and node type."""
     # Calculate base size for this level - decrease by 4 points per level
-    base_size = root_size - (level * 4)
+    base_size = root_size - (level * 2)
 
     if is_leaf:
         # Leaf nodes get a slightly smaller size than their parent level
-        return max(base_size - 2, 8)
+        return max(base_size - 2, 12)
     else:
         # Non-leaf nodes use the level's base size
-        return max(base_size, 10)
+        return max(base_size, 12)
 
 
 def wrap_text(text: str, width: float, font_size: int) -> List[str]:

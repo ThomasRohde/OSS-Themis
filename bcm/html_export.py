@@ -6,6 +6,7 @@ from typing import List
 from bcm.layout_manager import process_layout
 from bcm.models import LayoutModel
 from bcm.settings import Settings
+from bcm.svg_export import add_wrapped_text, calculate_font_size, wrap_text
 
 
 def create_html_node(node: LayoutModel, level: int = 0) -> str:
@@ -232,72 +233,6 @@ def export_to_html_macro(model: LayoutModel, settings: Settings) -> str:
 
     return html_content
 
-
-def calculate_font_size(root_size: int, level: int, is_leaf: bool) -> int:
-    """Calculate font size based on level and node type."""
-    # Calculate base size for this level - decrease by 4 points per level
-    base_size = root_size - (level * 4)
-
-    if is_leaf:
-        # Leaf nodes get a slightly smaller size than their parent level
-        return max(base_size - 2, 8)
-    else:
-        # Non-leaf nodes use the level's base size
-        return max(base_size, 10)
-
-
-def wrap_text(text: str, width: float, font_size: int) -> List[str]:
-    """Wrap text to fit within a given width."""
-    # Approximate characters that fit in width (assuming average char width is 0.6 * font_size)
-    chars_per_line = int(width / (font_size * 0.6))
-    # Wrap text into lines
-    return textwrap.wrap(text, width=max(1, chars_per_line))
-
-
-def add_wrapped_text(
-    g: ET.Element,
-    text: str,
-    x: float,
-    y: float,
-    height: float,
-    width: float,
-    root_font_size: int,
-    level: int,
-    has_children: bool = False,
-):
-    """Add wrapped text to SVG with proper positioning."""
-    # Calculate appropriate font size for this level
-    font_size = calculate_font_size(root_font_size, level, not has_children)
-
-    lines = wrap_text(text, width - 10, font_size)  # Subtract padding for text
-    line_height = font_size * 1.2  # Add some line spacing
-    total_text_height = line_height * len(lines)
-
-    # For nodes with children, position text near top
-    if has_children:
-        start_y = y + font_size - 4  # Add small padding from top
-    else:
-        # For leaf nodes, center text vertically
-        start_y = y + (height - total_text_height) / 2 + (font_size * 0.8)
-
-    # Create text element for each line
-    for i, line in enumerate(lines):
-        text_elem = ET.SubElement(
-            g,
-            "text",
-            {
-                "x": str(x),
-                "y": str(start_y + (i * line_height)),
-                "font-family": "Arial",
-                "text-anchor": "middle",
-                "dominant-baseline": "middle",
-                "font-size": str(font_size),
-                "fill": "#000000",
-            },
-        )
-        text_elem.text = line
-
-
 def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
     """Export the capability model to SVG format suitable for Confluence macros."""
     processed_model = process_layout(model, settings)
@@ -336,7 +271,6 @@ def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
             rect_attrs["data-tippy-content"] = node.description
             
         ET.SubElement(g, "rect", rect_attrs)
-
         # Add wrapped text with appropriate positioning
         add_wrapped_text(
             g,
@@ -370,6 +304,7 @@ def export_to_svg_macro(model: LayoutModel, settings: Settings) -> str:
     document.addEventListener("DOMContentLoaded", function() {{
         tippy('#svg-container rect', {{
             placement: 'right', // Tooltip position
+            maxWidth: '35%'
         }});
     }});
 </script>'''
