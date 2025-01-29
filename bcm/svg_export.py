@@ -3,6 +3,8 @@ import textwrap
 import xml.etree.ElementTree as ET
 from typing import List
 
+import markdown
+
 from bcm.layout_manager import process_layout
 from bcm.models import LayoutModel
 from bcm.settings import Settings
@@ -112,9 +114,10 @@ def add_node_to_svg(
         "stroke-width": "1",
     }
     
-    # Add tooltip if description exists
     if node.description:
-        rect_attrs["data-tippy-content"] = "node.description"
+        # Convert markdown description to HTML using markdown package
+        html_description = markdown.markdown(node.description)
+        rect_attrs["data-tippy-content"] = html_description
     
     ET.SubElement(g, "rect", rect_attrs)
 
@@ -155,6 +158,7 @@ def export_to_svg(model: LayoutModel, settings: Settings) -> str:
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+<link rel="stylesheet" href="https://unpkg.com/tippy.js/themes/light.css">
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
 
@@ -165,9 +169,9 @@ def export_to_svg(model: LayoutModel, settings: Settings) -> str:
             placement: 'right', // Tooltip position
             maxWidth: '35%',
             allowHTML: true, // Allow HTML content
+            theme: 'light', // Light theme
         }});
     }});
-</script>
-'''
+</script>'''
     
     return html_template

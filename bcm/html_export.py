@@ -3,7 +3,7 @@ import textwrap  # Add this import at the top
 import xml.etree.ElementTree as ET
 from typing import List
 
-import markdown  # Changed from markdown2
+import markdown
 
 from bcm.layout_manager import process_layout
 from bcm.models import LayoutModel
