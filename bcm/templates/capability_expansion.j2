@@ -1,0 +1,56 @@
+*** UPDATED ***
+
+Added GenAI created suggested alternative descriptions of domains, both long and short versions
+
+---
+
+See sheet 'Capabilities'.
+
+Generated manually using DanskeGPT and this prompt applied to all leaf domains (and context files with full EDM dump and background on capability modeling):
+
+You have been provided with a comprehensive high-level capability map for a financial services organization, including descriptions of each capability area. Using this context, focus on **{{Domain}}** and perform the following tasks:
+
+1. **Decomposition into Sub-Capabilities:**
+   
+    Break down the selected high-level capability into a clear and logically structured set of sub-capabilities. Each sub-capability should be as granular and actionable as possible, reflecting distinct business functions, processes, or activities that can be mapped to real-world workflows.
+   
+2. **Definitions and Boundaries:**
+   
+    For each sub-capability, provide a concise and standardized definition. Clearly articulate its scope, boundaries, and the unique business value it delivers. Ensure the definitions differentiate each sub-capability from others within the same high-level capability domain.
+   
+3. **Inputs, Outputs, and Stakeholders:**
+   
+    Identify the key inputs (e.g., data types, triggers, resources) and outputs (e.g., reports, decisions, services) associated with each sub-capability. Include the main internal stakeholders (roles, departments, teams) and any external parties (customers, partners, regulators) involved.
+   
+4. **Enabling Technologies and Tools:**
+   
+    Suggest relevant technologies, applications, or architectural components (e.g., CRM systems, data analytics platforms, workflow automation tools, integration layers, security frameworks) that could enable or support the execution of each sub-capability.
+   
+5. **Alignment with Industry Standards and Frameworks:**
+   
+    Where applicable, map each sub-capability to industry standards (such as BIAN service domains, TOGAF concepts, APQC process frameworks, or other relevant financial services frameworks) to provide external validation and a point of reference.
+   
+
+**Final Deliverable Format Requirements:**
+
+- Present the final deliverable as a single table.
+- Use the following columns and maintain the specified order and naming exactly:
+    - **Sub-Capability Name**
+    - **Definition**
+    - **Key Inputs**
+    - **Key Outputs**
+    - **Key Stakeholders**
+    - **Enabling Technologies**
+    - **Industry Alignment**
+- For each identified sub-capability, provide a single row.
+- Use consistent formatting across all rows.
+
+Output markdown format:
+
+| Sub-Capability Name | Definition | Key Inputs | Key Outputs | Key Stakeholders | Enabling Technologies | Industry Alignment |
+|---------------------|------------|------------|-------------|------------------|----------------------|-------------------|
+| [Name 1]            | [Text]     | [Text]     | [Text]      | [Text]           | [Text]              | [Text]            |
+| [Name 2]            | [Text]     | [Text]     | [Text]      | [Text]           | [Text]              | [Text]            |
+| ...                 | ...        | ...        | ...         | ...              | ...                 | ...               |
+
+Ensure the final output follows this format exactly so that it remains consistent across multiple LLM invocations.

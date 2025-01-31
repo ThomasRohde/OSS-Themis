@@ -487,6 +487,18 @@ export const DraggableCapability: React.FC<Props> = ({
                         // First repair any malformed JSON
                         const repairedJson = jsonrepair(clipboardText);
                         capabilities = JSON.parse(repairedJson);
+                        
+                        // Clean up description fields
+                        const cleanupDescription = (cap: RecursiveCapability) => {
+                          if (cap.description) {
+                            // Replace sequences of newlines followed by spaces with a single newline
+                            cap.description = cap.description.replace(/\n+\s*/g, '\n\n');
+                          }
+                          if (cap.children?.length) {
+                            cap.children.forEach(cleanupDescription);
+                          }
+                        };
+                        capabilities.forEach(cleanupDescription);
                       } catch {
                         toast.error('Invalid clipboard content - expected JSON capabilities list');
                         return;

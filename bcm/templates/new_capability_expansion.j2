@@ -1,0 +1,66 @@
+Analyze the business capability '{{ capability_name }}' within the context provided below. Decompose this capability into a set of MECE sub-capabilities that adhere to the principles of effective business capability modeling. Create up to {{ max_capabilities }} sub-capabilities.
+
+The context is formatted using section tags that organize the information:
+
+- `<first_level_capabilities>` - Lists all top-level capabilities in the model with their descriptions  
+- `<capability_tree>` - Shows the full hierarchical tree structure with the current capability marked  
+- `<parent_hierarchy>` - Lists the chain of parent capabilities from root to current capability  
+- `<sibling_context>` - Shows other capabilities at the same level under the same parent  
+- `<current_capability>` - Contains the name and description of the current capability  
+- `<sub_capabilities>` - Lists any existing sub-capabilities under the current capability. You can use this to avoid duplication.
+
+These section tags help structure the context in a way that makes it clear how each piece of information relates to the overall capability model hierarchy.
+
+**Context:**  
+{{ context }}
+
+#### **Instructions:**
+For each sub-capability identified, provide:
+
+1. **Name:** A concise and descriptive name that clearly communicates the sub-capability’s focus.  
+2. **Description:** A **two paragraph**, business-oriented explanation in markdown format that outlines the sub-capability’s scope, purpose, intended outcomes, and alignment with the overall business capability. This explanation should be understandable to both business and technical stakeholders.  
+
+   **After these two paragraphs, also include**:
+   - **Inputs, Outputs, and Stakeholders:** Key inputs (data, triggers, resources), outputs (reports, decisions, services), and the main internal/external stakeholders (e.g., roles, departments, teams, customers, partners, regulators).
+   - **Enabling Technologies and Tools:** Relevant technologies, applications, or architectural components that could enable or support the execution of this sub-capability.
+   - **Alignment with Industry Standards and Frameworks:** Any applicable references to industry standards (e.g., BIAN, TOGAF, APQC) or other financial services frameworks.
+
+Use the following considerations when defining sub-capabilities:
+
+- **Alignment with Parent Capability:** Each sub-capability should directly contribute to and be a logical extension of '{{ capability_name }}'.  
+- **Alignment with any existing sub-capabilities:** Ensure the sub-capabilities are consistent with any existing sub-capabilities.  
+- **MECE Structure:** Ensure the sub-capabilities are Mutually Exclusive and Collectively Exhaustive.  
+- **Business Value:** Clearly articulate the value each sub-capability provides to the organization.  
+- **Expansion**: If the capability has existing sub-capabilities in `<sibling_context>`, find new capabilities that expand the scope of the existing capability, and do not just repeat current sub-capabilities.  
+- **Distinctness:** Ensure there is no overlap in scope or responsibility between sub-capabilities.  
+- **Completeness:** The set of sub-capabilities should collectively cover the entire scope of '{{ capability_name }}' without any gaps.  
+- **Consistency:** Maintain a consistent level of detail and abstraction across all sub-capabilities.  
+- **Expansion**: If the capability has existing capabilities in `<sub_capabilities>`, find new capabilities that expand the scope of the existing capability, and do not just repeat the current sub-capabilities.
+
+---
+
+### **JSON Output Format:**
+
+Produce a JSON array, where each element represents a sub-capability with the following fields:
+
+```json
+[
+  {
+    "name": "Capability 1",
+    "description": "description": "Two paragraphs in markdown detailing the sub-capability’s business-oriented explanation.\n\n**Inputs, Outputs, and Stakeholders:**...\n\n**Enabling Technologies and Tools:** ...\n\n**Alignment with Industry Standards and Frameworks: ...**"
+  },
+  {
+    "name": "Capability 2",
+    "description": "Two paragraphs in markdown detailing the sub-capability’s business-oriented explanation.\n\n**Inputs, Outputs, and Stakeholders:**...\n\n**Enabling Technologies and Tools:** ...\n\n**Alignment with Industry Standards and Frameworks: ...**"
+  }
+]
+```
+
+Where:  
+- **name**: The concise, descriptive name of the sub-capability.  
+- **description**: A **two-paragraph** markdown explanation with a bullet lists detailing:
+  - **Inputs, Outputs, and Stakeholders**  
+  - **Enabling Technologies and Tools**  
+  - **Alignment with Industry Standards and Frameworks**  
+
+Ensure the final output is valid JSON (e.g., no trailing commas, correct brackets).
