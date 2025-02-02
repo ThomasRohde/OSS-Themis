@@ -539,37 +539,48 @@ class DatabaseOperations:
             await session.execute(text("PRAGMA foreign_keys = ON"))
             await session.commit()
 
-            # Get all capabilities and verify their parent relationships
+            # Get all capabilities
             stmt = select(Capability).order_by(Capability.order_position)
             result = await session.execute(stmt)
             capabilities = result.scalars().all()
 
-            # Create mapping of valid DB IDs to new UUIDs
+            # Create a mapping of capabilities by ID for easy lookup
+            cap_by_id = {cap.id: cap for cap in capabilities}
+            
+            # Create mapping of DB IDs to new UUIDs
             id_mapping = {}
-            export_data = []
 
-            # First pass: Map IDs and validate parent relationships
+            # Helper function to validate ancestor chain
+            def has_valid_ancestors(cap_id: int, visited: set) -> bool:
+                if cap_id in visited:
+                    return False  # Circular reference
+                
+                cap = cap_by_id.get(cap_id)
+                if not cap:
+                    return False
+                
+                if cap.parent_id is None:
+                    return True  # Root capability
+                
+                visited.add(cap_id)
+                return has_valid_ancestors(cap.parent_id, visited)
+
+            # First pass: Map IDs for all capabilities with valid ancestor chains
             for cap in capabilities:
-                # Only include capabilities that either:
-                # 1. Have no parent (root capabilities)
-                # 2. Have a parent that exists in our capabilities list
-                if cap.parent_id is None or any(
-                    p.id == cap.parent_id for p in capabilities
-                ):
+                if has_valid_ancestors(cap.id, set()):
                     id_mapping[cap.id] = str(uuid4())
 
-            # Second pass: Create export data with validated parent references
+            # Second pass: Create export data maintaining parent relationships
+            export_data = []
             for cap in capabilities:
-                if cap.id in id_mapping:  # Only include validated capabilities
+                if cap.id in id_mapping:
                     export_data.append(
                         {
                             "id": id_mapping[cap.id],
                             "name": cap.name,
                             "capability": 0,
                             "description": cap.description or "",
-                            "parent": id_mapping.get(cap.parent_id)
-                            if cap.parent_id in id_mapping
-                            else None,
+                            "parent": id_mapping[cap.parent_id] if cap.parent_id in id_mapping else None,
                         }
                     )
 
