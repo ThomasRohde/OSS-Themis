@@ -34,7 +34,7 @@ const LoginScreen: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center text-gray-900 mb-6">
-          Business Capability Model
+          Themis login
         </h1>
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
