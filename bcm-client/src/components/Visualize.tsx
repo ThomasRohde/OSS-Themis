@@ -23,7 +23,7 @@ export const Visualize: React.FC<VisualizeProps> = ({ sessionId }) => {
     space_key: Cookies.get('confluence_space_key') || '',
     token: Cookies.get('confluence_token') || '',
     parent_page_title: Cookies.get('confluence_parent_page_title') || '',
-    confluence_url: Cookies.get('confluence_url') || 'https://confluence.danskenet.net'
+    confluence_url: Cookies.get('confluence_url') || 'https://confluence.atlassian.net'
   });
   const [publishing, setPublishing] = useState(false);
   const [publishProgress, setPublishProgress] = useState<PublishProgress | null>(null);
