@@ -63,7 +63,7 @@ Perfect for enterprise architects, business analysts, and organizational designe
 
 ```bash
 # Clone the repository
-git clone https://github.com/ThomasRohde/themis.git
+git clone https://github.com/ThomasRohde/OSS-Themis.git
 cd themis
 
 # Create and activate virtual environment
