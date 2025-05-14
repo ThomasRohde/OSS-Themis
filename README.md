@@ -14,7 +14,7 @@ The tool excels at breaking down large organizational concepts into well-defined
 - Managing model evolution through comprehensive audit logging
 - Categorizing and organizing software systems that support business capabilities
 
-Perfect for enterprise architects, business analysts, and organizational designers who need to create clear, well-structured models of business functions, processes, or knowledge domains. The smart copy-paste feature makes it easy to leverage AI platforms like [DanskeGPT](https://genaiportal.danskenet.net/danskegpt) for capability generation and refinement while maintaining model integrity.
+Perfect for enterprise architects, business analysts, and organizational designers who need to create clear, well-structured models of business functions, processes, or knowledge domains. The smart copy-paste feature makes it easy to leverage AI platforms like ChatGPT for capability generation and refinement while maintaining model integrity.
 
 ## Features
 
@@ -55,9 +55,9 @@ Perfect for enterprise architects, business analysts, and organizational designe
 
 ## Prerequisites
 
-- [Git Client for Windows](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=e0d66c22617337c0c54df75aaf45901c&catalog_id=553833348d5c6700e10d47f81f09fd16)
-- [Python 3.12.4](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=fbd66062617337c0c54df75aaf45904e&catalog_id=553833348d5c6700e10d47f81f09fd16) or higher
-- [Node.js 23.3.0](https://servicenow.danskenet.net/solveit?id=sc_cat_item_webshop&sys_id=ec21f170c3aa7d506fd59e472f5d7546&catalog_id=553833348d5c6700e10d47f81f09fd16) or higher
+- Git client
+- Python 3.12
+- Node.js
 
 ## Installation
 
